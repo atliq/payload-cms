@@ -69,6 +69,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    authors: Author;
+    categories: Category;
+    posts: Post;
+    'culture-posts': CulturePost;
+    inquiries: Inquiry;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +83,11 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    authors: AuthorsSelect<false> | AuthorsSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    'culture-posts': CulturePostsSelect<false> | CulturePostsSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -161,6 +171,242 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors".
+ */
+export interface Author {
+  id: number;
+  name: string;
+  slug: string;
+  status: 'published' | 'draft' | 'archived';
+  profile: number | Media;
+  linkedinUrl?: string | null;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Original HTML from Directus migration.
+   */
+  legacyDescription?: string | null;
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * Recommended max 70 characters.
+     */
+    title?: string | null;
+    /**
+     * Recommended max 160 characters.
+     */
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    /**
+     * Prevent search engines from indexing.
+     */
+    noIndex?: boolean | null;
+    /**
+     * Prevent search engines from following links.
+     */
+    noFollow?: boolean | null;
+    /**
+     * Recommended size: 1200 x 630 pixels.
+     */
+    ogImage?: (number | null) | Media;
+    sitemapChangeFrequency?: ('always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never') | null;
+    /**
+     * Value between 0.0 and 1.0.
+     */
+    sitemapPriority?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  status: 'published' | 'draft' | 'archived';
+  author?: (number | null) | Author;
+  publishedAt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Original HTML from Directus migration.
+   */
+  legacyContent?: string | null;
+  excerpt?: string | null;
+  categories?: (number | Category)[] | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * Recommended max 70 characters.
+     */
+    title?: string | null;
+    /**
+     * Recommended max 160 characters.
+     */
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    /**
+     * Prevent search engines from indexing.
+     */
+    noIndex?: boolean | null;
+    /**
+     * Prevent search engines from following links.
+     */
+    noFollow?: boolean | null;
+    /**
+     * Recommended size: 1200 x 630 pixels.
+     */
+    ogImage?: (number | null) | Media;
+    sitemapChangeFrequency?: ('always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never') | null;
+    /**
+     * Value between 0.0 and 1.0.
+     */
+    sitemapPriority?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "culture-posts".
+ */
+export interface CulturePost {
+  id: number;
+  title: string;
+  slug: string;
+  status: 'published' | 'draft' | 'archived';
+  publishedAt?: string | null;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Original HTML from Directus migration. May contain WordPress Visual Composer markup.
+   */
+  legacyContent?: string | null;
+  excerpt?: string | null;
+  categories?: (number | Category)[] | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * Recommended max 70 characters.
+     */
+    title?: string | null;
+    /**
+     * Recommended max 160 characters.
+     */
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    /**
+     * Prevent search engines from indexing.
+     */
+    noIndex?: boolean | null;
+    /**
+     * Prevent search engines from following links.
+     */
+    noFollow?: boolean | null;
+    /**
+     * Recommended size: 1200 x 630 pixels.
+     */
+    ogImage?: (number | null) | Media;
+    sitemapChangeFrequency?: ('always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never') | null;
+    /**
+     * Value between 0.0 and 1.0.
+     */
+    sitemapPriority?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  website?: string | null;
+  subject?: string | null;
+  message: string;
+  sourceIp?: string | null;
+  status: 'new' | 'reviewed' | 'archived';
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -190,6 +436,26 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'authors';
+        value: number | Author;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'culture-posts';
+        value: number | CulturePost;
+      } | null)
+    | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -270,6 +536,129 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "authors_select".
+ */
+export interface AuthorsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  status?: T;
+  profile?: T;
+  linkedinUrl?: T;
+  description?: T;
+  legacyDescription?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noIndex?: T;
+        noFollow?: T;
+        ogImage?: T;
+        sitemapChangeFrequency?: T;
+        sitemapPriority?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  author?: T;
+  publishedAt?: T;
+  content?: T;
+  legacyContent?: T;
+  excerpt?: T;
+  categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noIndex?: T;
+        noFollow?: T;
+        ogImage?: T;
+        sitemapChangeFrequency?: T;
+        sitemapPriority?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "culture-posts_select".
+ */
+export interface CulturePostsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  content?: T;
+  legacyContent?: T;
+  excerpt?: T;
+  categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noIndex?: T;
+        noFollow?: T;
+        ogImage?: T;
+        sitemapChangeFrequency?: T;
+        sitemapPriority?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  company?: T;
+  website?: T;
+  subject?: T;
+  message?: T;
+  sourceIp?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

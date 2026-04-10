@@ -22,7 +22,8 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "migrate:directus": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/migrate-from-directus.ts"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.11.0",
@@ -43,6 +44,7 @@
     "@eslint/eslintrc": "^3.2.0",
     "@playwright/test": "1.58.2",
     "@testing-library/react": "16.3.0",
+    "@types/jsdom": "^28.0.1",
     "@types/node": "22.19.9",
     "@types/react": "19.2.9",
     "@types/react-dom": "19.2.3",
