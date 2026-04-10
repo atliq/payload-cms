@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { seoField } from '@/fields/seo'
 import { slugField } from '@/fields/slugField'
 import { isAuthenticatedOrPublished, isAuthenticated } from '@/access'
@@ -53,6 +54,7 @@ export const Authors: CollectionConfig = {
       name: 'description',
       type: 'richText',
       label: 'Description',
+      editor: lexicalEditor(),
     },
     {
       name: 'legacyDescription',
