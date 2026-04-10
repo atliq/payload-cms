@@ -12,8 +12,8 @@ Migrates all content from Directus (`wp-api.atliq.com`) into this Payload CMS in
 
 ### Prerequisites
 
-- Node.js ≥ 20, pnpm installed
-- Dependencies installed: `pnpm install`
+- Node.js ≥ 20, yarn installed
+- Dependencies installed: `yarn install`
 - `.env` file present with `PAYLOAD_SECRET` (already committed)
 
 ### Step 1 — Apply DB migrations (one time)
@@ -21,7 +21,7 @@ Migrates all content from Directus (`wp-api.atliq.com`) into this Payload CMS in
 Creates all tables in the local SQLite file. Run this before the migration script, and any time new migrations are added.
 
 ```bash
-pnpm payload migrate
+yarn payload migrate
 ```
 
 This uses wrangler's `getPlatformProxy` to create a local SQLite DB at `.wrangler/state/v3/d1/`. No Cloudflare credentials required.
@@ -29,10 +29,10 @@ This uses wrangler's `getPlatformProxy` to create a local SQLite DB at `.wrangle
 ### Step 2 — Run the data migration script
 
 ```bash
-pnpm migrate:directus
+yarn migrate:directus
 ```
 
-> **Do not run this while `pnpm dev` is running.** Both open the same SQLite file and you'll get locking errors.
+> **Do not run this while `yarn dev` is running.** Both open the same SQLite file and you'll get locking errors.
 
 What it does:
 1. Connects to the live Directus API at `wp-api.atliq.com`
@@ -63,7 +63,7 @@ Fetched: 12 authors, 7 categories, 150 posts, ...
 ### Step 3 — Start the admin panel
 
 ```bash
-PORT=3001 pnpm dev
+PORT=3001 yarn dev
 ```
 
 Visit **http://localhost:3001/admin**. On first visit you'll be prompted to create an admin user. Check each collection to verify the migrated data.
@@ -88,7 +88,7 @@ Then start the frontend in a separate terminal:
 
 ```bash
 cd ../atliq-website
-pnpm dev   # starts on http://localhost:3000
+yarn dev   # starts on http://localhost:3000
 ```
 
 ### Re-running after a partial failure
@@ -96,15 +96,15 @@ pnpm dev   # starts on http://localhost:3000
 The migration is idempotent. Each collection checks for existing records by slug before inserting. Just re-run:
 
 ```bash
-pnpm migrate:directus
+yarn migrate:directus
 ```
 
 ### Wiping and starting fresh
 
 ```bash
 rm -rf .wrangler/state
-pnpm payload migrate       # recreate tables
-pnpm migrate:directus      # re-run migration
+yarn payload migrate       # recreate tables
+yarn migrate:directus      # re-run migration
 ```
 
 ---
@@ -114,7 +114,7 @@ pnpm migrate:directus      # re-run migration
 ### 1. Deploy the database schema
 
 ```bash
-CLOUDFLARE_ENV=production pnpm deploy:database
+CLOUDFLARE_ENV=production yarn deploy:database
 ```
 
 This runs `payload migrate` against the remote D1 database via wrangler.
@@ -124,7 +124,7 @@ This runs `payload migrate` against the remote D1 database via wrangler.
 The migration script uses Payload's Local API and talks directly to D1. To target production D1, set `NODE_ENV=production` so `remoteBindings: true` is passed to `getPlatformProxy`:
 
 ```bash
-NODE_ENV=production pnpm migrate:directus
+NODE_ENV=production yarn migrate:directus
 ```
 
 > This writes directly to the production D1 database and production R2 bucket. Run only once after verifying locally.
@@ -132,7 +132,7 @@ NODE_ENV=production pnpm migrate:directus
 ### 3. Deploy the Payload CMS app
 
 ```bash
-CLOUDFLARE_ENV=production pnpm deploy:app
+CLOUDFLARE_ENV=production yarn deploy:app
 ```
 
 Configure the custom domain `cms.atliq.com` in the Cloudflare dashboard pointing to this Worker.
