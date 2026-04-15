@@ -1,9 +1,4 @@
 import 'dotenv/config'
-import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
-
-// MUST be first before importing anything else!
-initOpenNextCloudflareForDev()
-
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import {
