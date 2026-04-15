@@ -25,7 +25,7 @@ export async function fetchCategories() {
 
 export async function fetchPosts() {
   return directusFetch<any[]>(
-    '/items/Posts?fields=*,categories.Categories_id.*,seo.SEO_id.*,author.*&limit=-1',
+    '/items/Posts?fields=*,categories.Categories_id.*,seo.SEO_id.*,author.id&limit=-1',
   )
 }
 
@@ -43,7 +43,7 @@ export async function fetchSeoRecords() {
   return directusFetch<any[]>('/items/SEO?fields=*&limit=-1')
 }
 
-export async function downloadAsset(uuid: string): Promise<{ buffer: Buffer; filename: string; contentType: string }> {
+export async function downloadAsset(uuid: string): Promise<{ buffer: Uint8Array; filename: string; contentType: string }> {
   const res = await fetch(`${DIRECTUS_URL}/assets/${uuid}`, {
     headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
   })
@@ -61,7 +61,7 @@ export async function downloadAsset(uuid: string): Promise<{ buffer: Buffer; fil
 
   const arrayBuffer = await res.arrayBuffer()
   return {
-    buffer: Buffer.from(arrayBuffer),
+    buffer: new Uint8Array(arrayBuffer),
     filename,
     contentType,
   }

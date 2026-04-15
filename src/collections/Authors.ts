@@ -42,7 +42,6 @@ export const Authors: CollectionConfig = {
       name: 'profile',
       type: 'upload',
       relationTo: 'media',
-      required: true,
       label: 'Profile Image',
     },
     {

@@ -76,7 +76,7 @@ export async function migrateMedia(
         collection: 'media',
         data: { alt: altText },
         file: {
-          data: buffer,
+          data: buffer as unknown as Buffer,
           mimetype: contentType,
           name: filename,
           size: buffer.length,

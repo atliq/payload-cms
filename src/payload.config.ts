@@ -5,8 +5,18 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
+
+// Fix for migration scripts
+if (typeof window === 'undefined' && !process.env.NEXT_RUNTIME) {
+  try {
+    initOpenNextCloudflareForDev()
+  } catch (e) {
+    // Ignore if already initialized
+  }
+}
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'

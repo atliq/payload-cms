@@ -178,7 +178,7 @@ export interface Author {
   name: string;
   slug: string;
   status: 'published' | 'draft' | 'archived';
-  profile: number | Media;
+  profile?: (number | null) | Media;
   linkedinUrl?: string | null;
   description?: {
     root: {

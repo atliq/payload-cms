@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
   "name": "payload-cms",
+  "account_id": "0a06c8f94612fa729a02344c7bdb79ec",
   "compatibility_date": "2025-08-15",
   "compatibility_flags": [
     // Enable Node.js API
@@ -33,7 +34,9 @@
   "r2_buckets": [
     {
       "binding": "R2",
-      "bucket_name": "payload-cms-storage","preview_bucket_name": "payload-cms-storage",
+      "bucket_name": "payload-cms-storage",
+      "preview_bucket_name": "payload-cms-storage",
+      "remote": true,
     },
     // Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
     // {
