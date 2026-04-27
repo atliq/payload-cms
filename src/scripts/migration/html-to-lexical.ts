@@ -1,4 +1,6 @@
+import { randomBytes } from 'crypto'
 import { JSDOM } from 'jsdom'
+import type { IdMaps } from './id-map'
 
 interface LexicalNode {
   type: string
@@ -23,6 +25,17 @@ const FORMAT = {
   CODE: 16,
   SUBSCRIPT: 32,
   SUPERSCRIPT: 64,
+}
+
+const DIRECTUS_ASSET_REGEX = /wp-api\.atliq\.com\/assets\/([a-f0-9-]{36})/i
+
+function generateNodeId(): string {
+  return randomBytes(12).toString('hex')
+}
+
+function extractDirectusUuid(src: string): string | null {
+  const match = src.match(DIRECTUS_ASSET_REGEX)
+  return match ? match[1] : null
 }
 
 function createTextNode(text: string, format: number = 0): LexicalTextNode {
@@ -123,6 +136,28 @@ function createHorizontalRuleNode(): LexicalNode {
   return { type: 'horizontalrule', version: 1 }
 }
 
+function createUploadNode(payloadMediaId: number): LexicalNode {
+  return {
+    type: 'upload',
+    version: 3,
+    id: generateNodeId(),
+    format: '',
+    fields: null,
+    relationTo: 'media',
+    value: payloadMediaId,
+  }
+}
+
+function getUploadNodeFromImg(el: Element, idMaps: IdMaps | undefined): LexicalNode | null {
+  if (!idMaps) return null
+  const src = el.getAttribute('src') || ''
+  const uuid = extractDirectusUuid(src)
+  if (!uuid) return null
+  const payloadId = idMaps.media.get(uuid)
+  if (payloadId === undefined) return null
+  return createUploadNode(payloadId)
+}
+
 function getFormatFromTag(tagName: string): number {
   switch (tagName) {
     case 'STRONG':
@@ -148,7 +183,11 @@ function getFormatFromTag(tagName: string): number {
   }
 }
 
-function convertInlineNodes(node: Node, parentFormat: number = 0): LexicalNode[] {
+function convertInlineNodes(
+  node: Node,
+  parentFormat: number = 0,
+  idMaps?: IdMaps,
+): LexicalNode[] {
   const nodes: LexicalNode[] = []
 
   for (const child of Array.from(node.childNodes)) {
@@ -169,22 +208,22 @@ function convertInlineNodes(node: Node, parentFormat: number = 0): LexicalNode[]
 
       if (tag === 'A') {
         const href = el.getAttribute('href') || '#'
-        const linkChildren = convertInlineNodes(el, parentFormat)
+        const linkChildren = convertInlineNodes(el, parentFormat, idMaps)
         nodes.push(createLinkNode(href, linkChildren))
         continue
       }
 
       if (tag === 'IMG') {
-        // Skip images in inline context - they'll be handled as block-level
+        // IMG is block-level in Lexical — skip in inline context
+        // (block callers handle IMG extraction separately)
         continue
       }
 
       const format = getFormatFromTag(tag)
       if (format) {
-        nodes.push(...convertInlineNodes(el, parentFormat | format))
+        nodes.push(...convertInlineNodes(el, parentFormat | format, idMaps))
       } else {
-        // Unknown inline element - just process children
-        nodes.push(...convertInlineNodes(el, parentFormat))
+        nodes.push(...convertInlineNodes(el, parentFormat, idMaps))
       }
     }
   }
@@ -192,16 +231,37 @@ function convertInlineNodes(node: Node, parentFormat: number = 0): LexicalNode[]
   return nodes
 }
 
-function convertBlockNode(node: Element): LexicalNode[] {
+// Extracts upload nodes for any direct IMG children of the element.
+function extractImgUploadNodes(node: Element, idMaps: IdMaps | undefined): LexicalNode[] {
+  if (!idMaps) return []
+  const uploads: LexicalNode[] = []
+  for (const child of Array.from(node.children)) {
+    if (child.tagName === 'IMG') {
+      const uploadNode = getUploadNodeFromImg(child, idMaps)
+      if (uploadNode) uploads.push(uploadNode)
+    }
+  }
+  return uploads
+}
+
+function convertBlockNode(node: Element, idMaps?: IdMaps): LexicalNode[] {
   const tag = node.tagName
   const nodes: LexicalNode[] = []
 
   switch (tag) {
+    case 'IMG': {
+      const uploadNode = getUploadNodeFromImg(node, idMaps)
+      if (uploadNode) nodes.push(uploadNode)
+      break
+    }
+
     case 'P': {
-      const children = convertInlineNodes(node)
+      const imgUploads = extractImgUploadNodes(node, idMaps)
+      const children = convertInlineNodes(node, 0, idMaps)
       if (children.length > 0) {
         nodes.push(createParagraphNode(children))
       }
+      nodes.push(...imgUploads)
       break
     }
 
@@ -211,7 +271,7 @@ function convertBlockNode(node: Element): LexicalNode[] {
     case 'H4':
     case 'H5':
     case 'H6': {
-      const children = convertInlineNodes(node)
+      const children = convertInlineNodes(node, 0, idMaps)
       if (children.length > 0) {
         nodes.push(createHeadingNode(tag.toLowerCase(), children))
       }
@@ -223,7 +283,7 @@ function convertBlockNode(node: Element): LexicalNode[] {
       const listItems: LexicalNode[] = []
       for (const li of Array.from(node.children)) {
         if (li.tagName === 'LI') {
-          const liChildren = convertInlineNodes(li)
+          const liChildren = convertInlineNodes(li, 0, idMaps)
           if (liChildren.length > 0) {
             listItems.push(createListItemNode(liChildren))
           }
@@ -236,7 +296,7 @@ function convertBlockNode(node: Element): LexicalNode[] {
     }
 
     case 'BLOCKQUOTE': {
-      const children = convertInlineNodes(node)
+      const children = convertInlineNodes(node, 0, idMaps)
       if (children.length > 0) {
         nodes.push(createQuoteNode(children))
       }
@@ -255,7 +315,6 @@ function convertBlockNode(node: Element): LexicalNode[] {
     }
 
     case 'TABLE': {
-      // Tables are complex - store as a paragraph with text fallback
       const text = node.textContent?.trim() || ''
       if (text) {
         nodes.push(createParagraphNode([createTextNode(text)]))
@@ -272,13 +331,11 @@ function convertBlockNode(node: Element): LexicalNode[] {
     case 'FIGURE':
     case 'FIGCAPTION':
     case 'SPAN': {
-      // Container elements - recursively process children as blocks
       for (const child of Array.from(node.children)) {
-        nodes.push(...convertBlockNode(child))
+        nodes.push(...convertBlockNode(child, idMaps))
       }
-      // If no block children found, treat as paragraph
       if (nodes.length === 0) {
-        const inline = convertInlineNodes(node)
+        const inline = convertInlineNodes(node, 0, idMaps)
         if (inline.length > 0) {
           nodes.push(createParagraphNode(inline))
         }
@@ -287,8 +344,7 @@ function convertBlockNode(node: Element): LexicalNode[] {
     }
 
     default: {
-      // Unknown block element - treat as paragraph
-      const children = convertInlineNodes(node)
+      const children = convertInlineNodes(node, 0, idMaps)
       if (children.length > 0) {
         nodes.push(createParagraphNode(children))
       }
@@ -299,7 +355,7 @@ function convertBlockNode(node: Element): LexicalNode[] {
   return nodes
 }
 
-export function htmlToLexical(html: string): any | null {
+export function htmlToLexical(html: string, idMaps?: IdMaps): any | null {
   if (!html || !html.trim()) return null
 
   try {
@@ -310,13 +366,12 @@ export function htmlToLexical(html: string): any | null {
 
     for (const node of Array.from(body.childNodes)) {
       if (node.nodeType === 3) {
-        // Top-level text node
         const text = node.textContent?.trim() || ''
         if (text) {
           children.push(createParagraphNode([createTextNode(text)]))
         }
       } else if (node.nodeType === 1) {
-        children.push(...convertBlockNode(node as Element))
+        children.push(...convertBlockNode(node as Element, idMaps))
       }
     }
 

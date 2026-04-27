@@ -72,7 +72,7 @@ export async function migratePosts(
       const authorPayloadId = authorDirectusId ? idMaps.authors.get(authorDirectusId) : undefined
       const categoryIds = mapCategories(post, idMaps)
       const tags = mapTags(post)
-      const lexicalContent = htmlToLexical(post.content || '')
+      const lexicalContent = htmlToLexical(post.content || '', idMaps)
       const seoData = extractSeo(post, idMaps)
 
       const result = await payload.create({
