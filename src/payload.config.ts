@@ -44,7 +44,7 @@ const cloudflareLogger = {
 } as any // Use PayloadLogger type when it's exported
 
 const cloudflare =
-  isCLI || !isProduction
+  isCLI || !isProduction || process.env.REMOTE_BINDINGS === 'true'
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
@@ -77,7 +77,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        remoteBindings: isProduction,
+        remoteBindings: isProduction || process.env.REMOTE_BINDINGS === 'true',
       } satisfies GetPlatformProxyOptions),
   )
 }

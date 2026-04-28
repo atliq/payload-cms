@@ -67,7 +67,6 @@ export const Posts: CollectionConfig = {
       type: 'textarea',
       label: 'Legacy Content (HTML)',
       admin: {
-        readOnly: true,
         condition: (data) => Boolean(data?.legacyContent),
         description: 'Original HTML from Directus migration.',
       },

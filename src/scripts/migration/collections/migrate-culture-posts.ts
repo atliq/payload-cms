@@ -9,19 +9,24 @@ function stripSlugPrefix(slug: string): string {
     .replace(/^\/+/, '')
 }
 
+const VALID_FREQUENCIES = ['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never']
+
 function extractSeo(post: any, idMaps: IdMaps) {
   const seoRel = post.seo?.[0]?.SEO_id
   if (!seoRel) return {}
 
+  const freq = seoRel.sitemap_change_frequency
   return {
     seo: {
-      title: seoRel.title || '',
-      metaDescription: seoRel.meta_description || '',
+      title: seoRel.title ? String(seoRel.title).substring(0, 70) : '',
+      metaDescription: seoRel.meta_description
+        ? String(seoRel.meta_description).substring(0, 160)
+        : '',
       canonicalUrl: seoRel.canonical_url || '',
       noIndex: Boolean(seoRel.no_index),
       noFollow: Boolean(seoRel.no_follow),
       ogImage: seoRel.og_image ? idMaps.media.get(seoRel.og_image) || undefined : undefined,
-      sitemapChangeFrequency: seoRel.sitemap_change_frequency || undefined,
+      sitemapChangeFrequency: VALID_FREQUENCIES.includes(freq) ? freq : undefined,
       sitemapPriority: seoRel.sitemap_priority ?? undefined,
     },
   }
@@ -61,37 +66,36 @@ export async function migrateCulturePosts(
         limit: 1,
       })
 
-      if (existing.docs.length > 0) {
-        idMaps.culturePosts.set(post.id, existing.docs[0].id)
-        skipped++
-        console.log(`  [skip] Culture post exists: ${post.title}`)
-        continue
-      }
-
       const categoryIds = mapCategories(post, idMaps)
       const tags = mapTags(post)
       const lexicalContent = htmlToLexical(post.content || '', idMaps)
       const seoData = extractSeo(post, idMaps)
 
-      const result = await payload.create({
-        collection: 'culture-posts',
-        data: {
-          title: post.title,
-          slug,
-          status: post.status || 'published',
-          publishedAt: post.date || post.date_created,
-          content: lexicalContent,
-          legacyContent: post.content || '',
-          excerpt: post.excerpt || '',
-          categories: categoryIds,
-          tags,
-          ...seoData,
-        },
-      })
+      const postData = {
+        title: post.title,
+        slug,
+        status: post.status || 'published',
+        publishedAt: post.date || post.date_created,
+        content: lexicalContent,
+        legacyContent: post.content || '',
+        excerpt: post.excerpt || '',
+        categories: categoryIds,
+        tags,
+        ...seoData,
+      }
 
-      idMaps.culturePosts.set(post.id, result.id)
-      succeeded++
-      console.log(`  [ok] Culture post: ${post.title} (${post.id} -> ${result.id})`)
+      if (existing.docs.length > 0) {
+        const payloadId = existing.docs[0].id
+        await payload.update({ collection: 'culture-posts', id: payloadId, data: postData })
+        idMaps.culturePosts.set(post.id, payloadId)
+        succeeded++
+        console.log(`  [update] Culture post: ${post.title}`)
+      } else {
+        const result = await payload.create({ collection: 'culture-posts', data: postData })
+        idMaps.culturePosts.set(post.id, result.id)
+        succeeded++
+        console.log(`  [create] Culture post: ${post.title} (${post.id} -> ${result.id})`)
+      }
     } catch (error) {
       failed++
       console.error(`  [fail] Culture post "${post.title}":`, (error as Error).message)

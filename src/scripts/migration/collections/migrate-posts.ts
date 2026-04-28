@@ -9,19 +9,24 @@ function stripSlugPrefix(slug: string): string {
     .replace(/^\/+/, '')
 }
 
+const VALID_FREQUENCIES = ['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never']
+
 function extractSeo(post: any, idMaps: IdMaps) {
   const seoRel = post.seo?.[0]?.SEO_id
   if (!seoRel) return {}
 
+  const freq = seoRel.sitemap_change_frequency
   return {
     seo: {
-      title: seoRel.title || '',
-      metaDescription: seoRel.meta_description || '',
+      title: seoRel.title ? String(seoRel.title).substring(0, 70) : '',
+      metaDescription: seoRel.meta_description
+        ? String(seoRel.meta_description).substring(0, 160)
+        : '',
       canonicalUrl: seoRel.canonical_url || '',
       noIndex: Boolean(seoRel.no_index),
       noFollow: Boolean(seoRel.no_follow),
       ogImage: seoRel.og_image ? idMaps.media.get(seoRel.og_image) || undefined : undefined,
-      sitemapChangeFrequency: seoRel.sitemap_change_frequency || undefined,
+      sitemapChangeFrequency: VALID_FREQUENCIES.includes(freq) ? freq : undefined,
       sitemapPriority: seoRel.sitemap_priority ?? undefined,
     },
   }
@@ -61,13 +66,6 @@ export async function migratePosts(
         limit: 1,
       })
 
-      if (existing.docs.length > 0) {
-        idMaps.posts.set(post.id, existing.docs[0].id)
-        skipped++
-        console.log(`  [skip] Post exists: ${post.title}`)
-        continue
-      }
-
       const authorDirectusId = post.author?.id ?? post.author
       const authorPayloadId = authorDirectusId ? idMaps.authors.get(authorDirectusId) : undefined
       const categoryIds = mapCategories(post, idMaps)
@@ -75,26 +73,48 @@ export async function migratePosts(
       const lexicalContent = htmlToLexical(post.content || '', idMaps)
       const seoData = extractSeo(post, idMaps)
 
-      const result = await payload.create({
-        collection: 'posts',
-        data: {
-          title: post.title,
-          slug,
-          status: post.status || 'published',
-          author: authorPayloadId,
-          publishedAt: post.date || post.date_created,
-          content: lexicalContent,
-          legacyContent: post.content || '',
-          excerpt: post.excerpt || '',
-          categories: categoryIds,
-          tags,
-          ...seoData,
-        },
-      })
+      const postData = {
+        title: post.title,
+        slug,
+        status: post.status || 'published',
+        author: authorPayloadId,
+        publishedAt: post.date || post.date_created,
+        content: lexicalContent,
+        legacyContent: post.content || '',
+        excerpt: post.excerpt || '',
+        categories: categoryIds,
+        tags,
+        ...seoData,
+      }
 
-      idMaps.posts.set(post.id, result.id)
-      succeeded++
-      console.log(`  [ok] Post: ${post.title} (${post.id} -> ${result.id})`)
+      const withContentFallback = async (op: 'create' | 'update', id?: number | string) => {
+        try {
+          if (op === 'update' && id !== undefined) {
+            return await payload.update({ collection: 'posts', id, data: postData })
+          }
+          return await payload.create({ collection: 'posts', data: postData })
+        } catch (err) {
+          // Retry without Lexical content if content validation fails
+          console.warn(`  [warn] Retrying "${post.title}" without lexical content: ${(err as Error).message}`)
+          if (op === 'update' && id !== undefined) {
+            return await payload.update({ collection: 'posts', id, data: { ...postData, content: undefined } })
+          }
+          return await payload.create({ collection: 'posts', data: { ...postData, content: undefined } })
+        }
+      }
+
+      if (existing.docs.length > 0) {
+        const payloadId = existing.docs[0].id
+        await withContentFallback('update', payloadId)
+        idMaps.posts.set(post.id, payloadId)
+        succeeded++
+        console.log(`  [update] Post: ${post.title}`)
+      } else {
+        const result = await withContentFallback('create')
+        idMaps.posts.set(post.id, result.id)
+        succeeded++
+        console.log(`  [create] Post: ${post.title} (${post.id} -> ${result.id})`)
+      }
     } catch (error) {
       failed++
       console.error(`  [fail] Post "${post.title}":`, (error as Error).message)

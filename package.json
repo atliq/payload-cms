@@ -24,7 +24,12 @@
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
     "migrate:directus": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/migrate-from-directus.ts",
-    "migrate:content-images": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/migrate-content-images.ts"
+    "migrate:content-images": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/migrate-content-images.ts",
+    "migrate:rewrite-media-urls": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/rewrite-directus-media-urls.ts",
+    "migrate:fix-relative-urls": "cross-env NODE_OPTIONS='--no-deprecation' tsx src/scripts/fix-relative-media-urls.ts",
+    "migrate:fix-relative-urls:remote": "cross-env NODE_ENV=production NODE_OPTIONS='--no-deprecation' REMOTE_BINDINGS=true tsx src/scripts/fix-relative-media-urls.ts",
+    "migrate:rewrite-media-urls:remote": "cross-env NODE_ENV=production NODE_OPTIONS='--no-deprecation' REMOTE_BINDINGS=true tsx src/scripts/rewrite-directus-media-urls.ts",
+    "migrate:fix-double-extensions:remote": "cross-env NODE_ENV=production NODE_OPTIONS='--no-deprecation' REMOTE_BINDINGS=true tsx src/scripts/fix-double-extensions.ts"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.11.0",
