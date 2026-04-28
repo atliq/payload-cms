@@ -54,7 +54,7 @@ export async function migratePosts(
 ): Promise<{ succeeded: number; failed: number; skipped: number }> {
   let succeeded = 0
   let failed = 0
-  let skipped = 0
+  const skipped = 0
 
   for (const post of posts) {
     try {
