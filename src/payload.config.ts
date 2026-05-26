@@ -15,6 +15,8 @@ import { Categories } from './collections/Categories'
 import { Posts } from './collections/Posts'
 import { CulturePosts } from './collections/CulturePosts'
 import { Inquiries } from './collections/Inquiries'
+import { Documents } from './collections/Documents'
+import { Whitepapers } from './collections/Whitepapers'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -56,7 +58,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Authors, Categories, Posts, CulturePosts, Inquiries],
+  collections: [Users, Media, Authors, Categories, Posts, CulturePosts, Inquiries, Documents, Whitepapers],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -67,7 +69,7 @@ export default buildConfig({
   plugins: [
     r2Storage({
       bucket: cloudflare.env.R2,
-      collections: { media: true },
+      collections: { media: true, documents: true },
     }),
   ],
 })
