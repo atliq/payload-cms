@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { isAuthenticated } from '@/access'
 
+// 50 MB cap — Cloudflare Workers reject request bodies over 100 MB; this leaves headroom for multipart overhead.
 const MAX_PDF_BYTES = 52_428_800
 
 export const Documents: CollectionConfig = {
