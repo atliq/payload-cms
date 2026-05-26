@@ -74,6 +74,8 @@ export interface Config {
     posts: Post;
     'culture-posts': CulturePost;
     inquiries: Inquiry;
+    documents: Document;
+    whitepapers: Whitepaper;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +90,8 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     'culture-posts': CulturePostsSelect<false> | CulturePostsSelect<true>;
     inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    documents: DocumentsSelect<false> | DocumentsSelect<true>;
+    whitepapers: WhitepapersSelect<false> | WhitepapersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -407,6 +411,96 @@ export interface Inquiry {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents".
+ */
+export interface Document {
+  id: number;
+  /**
+   * Human-readable label shown in relationship pickers.
+   */
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whitepapers".
+ */
+export interface Whitepaper {
+  id: number;
+  title: string;
+  slug: string;
+  status: 'published' | 'draft' | 'archived';
+  author?: (number | null) | Author;
+  publishedAt?: string | null;
+  coverImage: number | Media;
+  pdfFile: number | Document;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  excerpt?: string | null;
+  categories?: (number | Category)[] | null;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Search engine optimization settings
+   */
+  seo?: {
+    /**
+     * Recommended max 70 characters.
+     */
+    title?: string | null;
+    /**
+     * Recommended max 160 characters.
+     */
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    /**
+     * Prevent search engines from indexing.
+     */
+    noIndex?: boolean | null;
+    /**
+     * Prevent search engines from following links.
+     */
+    noFollow?: boolean | null;
+    /**
+     * Recommended size: 1200 x 630 pixels.
+     */
+    ogImage?: (number | null) | Media;
+    sitemapChangeFrequency?: ('always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never') | null;
+    /**
+     * Value between 0.0 and 1.0.
+     */
+    sitemapPriority?: number | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -456,6 +550,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'inquiries';
         value: number | Inquiry;
+      } | null)
+    | ({
+        relationTo: 'documents';
+        value: number | Document;
+      } | null)
+    | ({
+        relationTo: 'whitepapers';
+        value: number | Whitepaper;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -657,6 +759,58 @@ export interface InquiriesSelect<T extends boolean = true> {
   message?: T;
   sourceIp?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "documents_select".
+ */
+export interface DocumentsSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "whitepapers_select".
+ */
+export interface WhitepapersSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  status?: T;
+  author?: T;
+  publishedAt?: T;
+  coverImage?: T;
+  pdfFile?: T;
+  description?: T;
+  excerpt?: T;
+  categories?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noIndex?: T;
+        noFollow?: T;
+        ogImage?: T;
+        sitemapChangeFrequency?: T;
+        sitemapPriority?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
