@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/Atliq Website CMS/payload-cms/src/app/\\(payload\\)/admin/**)",
+      "Bash(grep -in 'table\\\\|experimental' __TRACKED_VAR__/dist/exports/server/index.d.ts)",
+      "Bash(grep -in 'table\\\\|experimental' __TRACKED_VAR__/package.json)",
+      "Bash(grep -in 'experimental_table\\\\|EXPERIMENTAL_TableFeature\\\\|TableFeature' __TRACKED_VAR__/dist/index.d.ts)",
+      "Bash(grep -rl experimental_table/server __TRACKED_VAR__/dist)",
+      "Bash(pnpm run *)",
+      "Bash(grep -i \"collections\\\\\\\\\\\\\\\\\\\\\\(Posts\\\\|CulturePosts\\\\|Whitepapers\\\\|Authors\\\\\\)\\\\|error TS\")"
+    ]
+  }
+}
