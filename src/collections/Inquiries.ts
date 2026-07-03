@@ -1,5 +1,6 @@
 import type { CollectionConfig } from 'payload'
 import { isAuthenticated } from '@/access'
+import { forwardInquiryToKaizen } from '@/hooks/forwardInquiryToKaizen'
 
 export const Inquiries: CollectionConfig = {
   slug: 'inquiries',
@@ -17,6 +18,9 @@ export const Inquiries: CollectionConfig = {
     create: () => true,
     update: isAuthenticated,
     delete: isAuthenticated,
+  },
+  hooks: {
+    afterChange: [forwardInquiryToKaizen],
   },
   fields: [
     {
