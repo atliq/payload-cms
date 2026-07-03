@@ -8,5 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    // Each int suite boots Payload against the same local D1 SQLite file;
+    // running files in parallel intermittently fails with SQLITE_BUSY.
+    fileParallelism: false,
   },
 })

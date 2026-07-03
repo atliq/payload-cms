@@ -7,7 +7,15 @@
       "Bash(grep -in 'experimental_table\\\\|EXPERIMENTAL_TableFeature\\\\|TableFeature' __TRACKED_VAR__/dist/index.d.ts)",
       "Bash(grep -rl experimental_table/server __TRACKED_VAR__/dist)",
       "Bash(pnpm run *)",
-      "Bash(grep -i \"collections\\\\\\\\\\\\\\\\\\\\\\(Posts\\\\|CulturePosts\\\\|Whitepapers\\\\|Authors\\\\\\)\\\\|error TS\")"
+      "Bash(grep -i \"collections\\\\\\\\\\\\\\\\\\\\\\(Posts\\\\|CulturePosts\\\\|Whitepapers\\\\|Authors\\\\\\)\\\\|error TS\")",
+      "Bash(grep -nE 'return \\\\{$|table:|tr:|td:|th:|tbody:|thead:|colgroup:|col:|figure:' __TRACKED_VAR__/LexicalTable.dev.js)",
+      "Bash(sort -t: -k2)",
+      "Bash(uniq -c -f1)",
+      "Bash(sed -n 68,80p __TRACKED_VAR__/LexicalTable.dev.js)",
+      "Bash(grep -n 'function convertTableCellNodeElement' __TRACKED_VAR__/LexicalTable.dev.js)",
+      "PowerShell(pnpm test:int)",
+      "PowerShell(pnpm exec vitest run --config ./vitest.config.mts tests/int/kaizen-forward.int.spec.ts)",
+      "PowerShell(pnpm exec vitest run --config ./vitest.config.mts tests/int/kaizen-forward.int.spec.ts -t \"forwards new inquiries\")"
     ]
   }
 }
