@@ -15,7 +15,13 @@
       "Bash(grep -n 'function convertTableCellNodeElement' __TRACKED_VAR__/LexicalTable.dev.js)",
       "PowerShell(pnpm test:int)",
       "PowerShell(pnpm exec vitest run --config ./vitest.config.mts tests/int/kaizen-forward.int.spec.ts)",
-      "PowerShell(pnpm exec vitest run --config ./vitest.config.mts tests/int/kaizen-forward.int.spec.ts -t \"forwards new inquiries\")"
+      "PowerShell(pnpm exec vitest run --config ./vitest.config.mts tests/int/kaizen-forward.int.spec.ts -t \"forwards new inquiries\")",
+      "PowerShell(pnpm dev)",
+      "PowerShell($deadline = \\(Get-Date\\).AddSeconds\\(90\\); do { Start-Sleep -Seconds 3; try { $r = Invoke-WebRequest -Uri 'http://localhost:3000/api/access' -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop; $ready = $true } catch { $ready = \\($_.Exception.Response -ne $null\\) } } until \\($ready -or \\(Get-Date\\) -gt $deadline\\); if \\($ready\\) { 'SERVER READY' } else { 'TIMED OUT' })",
+      "WebFetch(domain:developers.cloudflare.com)",
+      "Bash(npx wrangler *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm payload *)"
     ]
   }
 }

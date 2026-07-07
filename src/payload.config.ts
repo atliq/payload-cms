@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -70,6 +71,21 @@ export default buildConfig({
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true, documents: true },
+    }),
+    importExportPlugin({
+      collections: [
+        {
+          slug: 'inquiries',
+          export: {
+            format: 'csv',
+            // No jobs runner exists on this Workers deployment; run exports synchronously
+            disableJobsQueue: true,
+            // Download-only: the exports collection is not wired to R2 storage
+            disableSave: true,
+          },
+          import: false,
+        },
+      ],
     }),
   ],
 })
