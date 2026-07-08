@@ -21,7 +21,13 @@
       "WebFetch(domain:developers.cloudflare.com)",
       "Bash(npx wrangler *)",
       "Bash(pnpm add *)",
-      "Bash(pnpm payload *)"
+      "Bash(pnpm payload *)",
+      "PowerShell(Get-Process node,workerd -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime, @{N='CPUmin';E={[math]::Round\\($_.CPU/60,1\\)}} | Format-Table -AutoSize)",
+      "Bash(pnpm exec *)",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(pnpm dev *)",
+      "PowerShell(Stop-Process -Id 24352 -Force -Confirm:$false)",
+      "PowerShell(\"killed 24352\")"
     ]
   }
 }
