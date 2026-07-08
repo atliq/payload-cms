@@ -8,6 +8,7 @@ import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
+import { withExportDateRange } from './plugins/exportDateRange'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -82,6 +83,7 @@ export default buildConfig({
             disableJobsQueue: true,
             // Download-only: the exports collection is not wired to R2 storage
             disableSave: true,
+            overrideCollection: withExportDateRange,
           },
           import: false,
         },

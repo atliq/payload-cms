@@ -526,6 +526,14 @@ export interface Export {
   sortOrder?: ('asc' | 'desc') | null;
   drafts?: ('yes' | 'no') | null;
   selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  /**
+   * Only include entries created on or after this date
+   */
+  dateFrom?: string | null;
+  /**
+   * Only include entries created on or before this date
+   */
+  dateTo?: string | null;
   fields?: string[] | null;
   collectionSlug: string;
   where?:
@@ -1006,6 +1014,8 @@ export interface ExportsSelect<T extends boolean = true> {
   sortOrder?: T;
   drafts?: T;
   selectionToUse?: T;
+  dateFrom?: T;
+  dateTo?: T;
   fields?: T;
   collectionSlug?: T;
   where?: T;
